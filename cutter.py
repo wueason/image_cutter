@@ -2,7 +2,7 @@
 import cv2
 import numpy as np
 
-def find_center_point(file, blue_green_red=[], DEBUG=False):
+def find_center_point(file, blue_green_red=[], target_range=(), DEBUG=False):
     result = False
     if not blue_green_red:
         return result
@@ -45,6 +45,12 @@ def find_center_point(file, blue_green_red=[], DEBUG=False):
     for con in contours:
         # 轮廓转换为矩形
         rect = cv2.minAreaRect(con)
+        if not (target_range and 
+            rect[1][0] >= target_range[0] - 5 and
+            rect[1][0] <= target_range[0] + 5 and
+            rect[1][1] >= target_range[1] - 5 and
+            rect[1][1] <= target_range[1] + 5):
+            continue
         centers.append(rect)
         if DEBUG:
             # 矩形转换为box对象

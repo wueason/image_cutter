@@ -45,11 +45,12 @@ def find_center_point(file, blue_green_red=[], target_range=(), DEBUG=False):
     for con in contours:
         # 轮廓转换为矩形
         rect = cv2.minAreaRect(con)
-        if not (target_range and 
-            rect[1][0] >= target_range[0] - 5 and
-            rect[1][0] <= target_range[0] + 5 and
-            rect[1][1] >= target_range[1] - 5 and
-            rect[1][1] <= target_range[1] + 5):
+
+        # 如果给定了目标图的范围，就把不符合的尺寸过滤掉
+        if target_range not (rect[1][0] >= target_range[0][0] and
+            rect[1][0] <= target_range[0][1] and
+            rect[1][1] >= target_range[1][0] and
+            rect[1][1] <= target_range[1][1]):
             continue
         centers.append(rect)
         if DEBUG:
@@ -92,6 +93,9 @@ if __name__ == '__main__':
 
     # 右边的绿色盒子
     # bgr = [40, 158, 31]
+    
+    # 宽高范围
+    # target_range = ((41, 43), (42, 45))
 
     point = find_center_point('opencv-sample-box.png',
                                 blue_green_red=bgr,

@@ -2,10 +2,17 @@
 import cv2
 import numpy as np
 
-def find_center_point(file, lower=None, upper=None, DEBUG=False):
+def find_center_point(file, blue_green_red=[], DEBUG=False):
     result = False
-    if not (lower and upper):
+    if not blue_green_red:
         return result
+
+    # 偏移量
+    thresh = 30
+    hsv = cv2.cvtColor(np.uint8([[blue_green_red]]), cv2.COLOR_BGR2HSV)[0][0]
+    lower = np.array([hsv[0] - thresh, hsv[1] - thresh, hsv[2] - thresh])
+    upper = np.array([hsv[0] + thresh, hsv[1] + thresh, hsv[2] + thresh])
+
     # 载入图片
     img = cv2.imread(file)
 
@@ -13,7 +20,7 @@ def find_center_point(file, lower=None, upper=None, DEBUG=False):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
     # 获取遮盖层
-    mask = cv2.inRange(hsv, np.array(lower), np.array(upper))
+    mask = cv2.inRange(hsv, lower, upper)
 
     # 模糊处理
     blurred = cv2.blur(mask, (9, 9))
@@ -34,9 +41,11 @@ def find_center_point(file, lower=None, upper=None, DEBUG=False):
         dilate.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     i = 0
+    centers = []
     for con in contours:
         # 轮廓转换为矩形
         rect = cv2.minAreaRect(con)
+        centers.append(rect)
         if DEBUG:
             # 矩形转换为box对象
             box=np.int0(cv2.boxPoints(rect))
@@ -54,8 +63,11 @@ def find_center_point(file, lower=None, upper=None, DEBUG=False):
             if y_right - y_left > 0 and x_right - x_left > 0:
                 i += 1
                 # 裁剪目标矩形区域
-                temp = img[y_left:y_right, x_left:x_right]
-                cv2.imshow('target_'+str(i), temp)
+                target = img[y_left:y_right, x_left:x_right]
+                target_file = 'target_{}'.format(str(i))
+                cv2.imwrite(target_file + '.png', target)
+                cv2.imshow(target_file, target)
+
 
             print('rect: {}'.format(rect))
             print('y: {},{}'.format(y_left, y_right))
@@ -65,7 +77,7 @@ def find_center_point(file, lower=None, upper=None, DEBUG=False):
         cv2.imshow('origin', img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    return i > 0
+    return centers
 
 if __name__ == '__main__':
     # 目标的 bgr 颜色值，请注意顺序
@@ -75,13 +87,7 @@ if __name__ == '__main__':
     # 右边的绿色盒子
     # bgr = [40, 158, 31]
 
-    # 偏移量
-    thresh = 30
-    hsv = cv2.cvtColor(np.uint8([[bgr]]), cv2.COLOR_BGR2HSV)[0][0]
-    minHSV = [hsv[0] - thresh, hsv[1] - thresh, hsv[2] - thresh]
-    maxHSV = [hsv[0] + thresh, hsv[1] + thresh, hsv[2] + thresh]
     point = find_center_point('opencv-sample-box.png',
-                                lower=minHSV,
-                                upper=maxHSV,
+                                blue_green_red=bgr,
                                 DEBUG=True)
     print(point)

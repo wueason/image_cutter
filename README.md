@@ -9,16 +9,10 @@ Cut specially shape from image and the Center point of it base on HSV color mode
 ```Python
 # 目标的 bgr 颜色值，请注意顺序
 bgr = [40, 158, 31]
-
-# 偏移量
-thresh = 30
-hsv = cv2.cvtColor(np.uint8([[bgr]]), cv2.COLOR_BGR2HSV)[0][0]
-minHSV = [hsv[0] - thresh, hsv[1] - thresh, hsv[2] - thresh]
-maxHSV = [hsv[0] + thresh, hsv[1] + thresh, hsv[2] + thresh]
 point = find_center_point('opencv-sample-box.png',
-                            lower=minHSV,
-                            upper=maxHSV,
+                            bgr=bgr,
                             DEBUG=True)
 # 中心坐标
-print(point)
+# point: [((152.0, 152.0), (63.99999237060547, 61.99999237060547), -0.0)]
+print(point[0][0][0])
 ```

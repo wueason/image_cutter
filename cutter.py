@@ -47,7 +47,7 @@ def find_center_point(file, blue_green_red=[], target_range=(), DEBUG=False):
         rect = cv2.minAreaRect(con)
 
         # 如果给定了目标图的范围，就把不符合的尺寸过滤掉
-        if target_range not (rect[1][0] >= target_range[0][0] and
+        if target_range and not (rect[1][0] >= target_range[0][0] and
             rect[1][0] <= target_range[0][1] and
             rect[1][1] >= target_range[1][0] and
             rect[1][1] <= target_range[1][1]):
